@@ -64,16 +64,20 @@ if facheck(args.query) == 1:
 	progexit(1)
 
 # Run blastn
-header()
+if args.outfmt == '6':
+	header()
 for f in args.fasta:
 	if facheck(f) == 1:
 		continue
 	fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=args.outfmt, num_threads=args.cpus, word_size=args.wordsize, dust=dust)
 	stdout, stderr = fBLAST()
 	if stdout:
-		BLASTout = stdout.split('\n')
-		for line in BLASTout:
-			if line.strip():
-				lineOUT = ''.join(line)
-				print f + '\t' + lineOUT
+		if args.outfmt == '6':
+			BLASTout = stdout.split('\n')
+			for line in BLASTout:
+				if line.strip():
+					lineOUT = ''.join(line)
+					print f + '\t' + lineOUT
+		else:
+			print stdout
 progexit(0)
