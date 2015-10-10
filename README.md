@@ -55,16 +55,16 @@ See [here](http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&D
 
 `$ fastablasta --query [QUERY] --wordsize 11 FASTA1 FASTA2 FASTA3`  
 
-**To search for short nucleotide sequences shorter than 30bp:**  
+**To search for short nucleotide sequences <30bp:**  
 
 `$ fastablasta --query [QUERY] --short FASTA1 FASTA2 FASTA3`  
 
-This optimises the parameters to search for short sequences. The main changes are:  
+This optimises the parameters to search for short sequences (blastn-short). The main changes are:  
 
-| Program                             | Word Size | Filter Setting | Expect Value |  
-|:----------------------------------- |:---------:|:--------------:|:------------:|  
-| Standard Nucleotide BLAST           |    11     |   On (DUST)    |        10    |  
-| Search for short/near exact matches |     7     |      Off       |      1000    |  
+| Program                             |     Task     | Word Size | Filter Setting | Expect Value |  
+|:----------------------------------- |:------------:|:---------:|:--------------:|:------------:|  
+| Standard Nucleotide BLAST           |    blastn    |    11     |   On (DUST)    |        10    |  
+| Search for short/near exact matches | blastn-short |     7     |      Off       |      1000    |  
 
 See [here](http://www.ncbi.nlm.nih.gov/BLAST/Why.shtml) for more information.  
 
