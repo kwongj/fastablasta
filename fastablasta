@@ -9,9 +9,9 @@ from argparse import RawTextHelpFormatter
 parser = argparse.ArgumentParser(
 	formatter_class=RawTextHelpFormatter,
 	description='Searches a FASTA file for a specified query sequence using BLASTN',
-	usage='\n  %(prog)s [OPTIONS] FASTA1 FASTA2 FASTA3 ... FASTAN > results.txt')
+	usage='\n  %(prog)s --query QUERY [OPTIONS] FASTA1 FASTA2 FASTA3 ... FASTAN > results.txt')
 parser.add_argument('fasta', metavar='FASTA', nargs='+', help='FASTA file to search (required)')
-parser.add_argument('--query', metavar='FASTA', required=True, help='query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)')
+parser.add_argument('--query', metavar='QUERY', required=True, help='query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)')
 parser.add_argument('--id', metavar='%ID', default='99', help='percentage identity cutoff (default="99")')
 parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default="1e-99")')
 parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default="32")')
