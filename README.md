@@ -24,12 +24,12 @@ positional arguments:
 optional arguments:
   -h, --help       show this help message and exit
   --query QUERY    query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)
-  --id %ID         percentage identity cutoff (default="99")
-  --evalue EVALUE  evalue cutoff (default="1e-99")
-  --wordsize SIZE  length of initial match (default="32")
+  --id %ID         percentage identity cutoff (default=99)
+  --evalue EVALUE  evalue cutoff (default=1e-99)
+  --wordsize SIZE  length of initial match (default=32)
   --short          allow searching for short sequences
-  --outfmt FORMAT  specify output format (default="6")
-  --cpus CPUS      number of CPUS to use (default="1")
+  --outfmt FORMAT  specify output format (default=6)
+  --cpus CPUS      number of CPUS to use (default=1)
   --version        show program's version number and exit
 ```
 
@@ -37,13 +37,16 @@ optional arguments:
 
 `$ fastablasta --query [QUERY] FASTA1 FASTA2 FASTA3`  
 
+
 **To save output to file:**  
 
 `$ fastablasta --query [QUERY] FASTA1 FASTA2 FASTA3 > results.txt`  
 
+
 **To use 100% identity cutoff:**  
 
 `$ fastablasta --query [QUERY] --id 100 FASTA1 FASTA2 FASTA3`  
+
 
 **To use high Evalue cutoff:**  
 
@@ -51,9 +54,11 @@ optional arguments:
 
 See [here](http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=FAQ#expect) for more information on expect(E) values.  
 
+
 **To change length of initial match (default = 32):**  
 
 `$ fastablasta --query [QUERY] --wordsize 11 FASTA1 FASTA2 FASTA3`  
+
 
 **To search for short nucleotide sequences <30bp:**  
 
@@ -68,11 +73,12 @@ This optimises the parameters to search for short sequences (blastn-short). The 
 
 See [here](http://www.ncbi.nlm.nih.gov/BLAST/Why.shtml) for more information.  
 
+
 **To set output format:**  
 
 `$ fastablasta --query [QUERY] --outfmt 6 FASTA1 FASTA2 FASTA3`  
 
-alignment view options:  
+***alignment view options:***  
 0 = pairwise  
 1 = query-anchored showing identities  
 2 = query-anchored no identities  
@@ -88,6 +94,7 @@ alignment view options:
 12 = JSON Seqalign output  
 13 = JSON Blast output  
 14 = XML2 Blast output  
+
 
 ##Bugs
 Please submit via the GitHub issues page: [https://github.com/kwongj/fastablasta/issues](https://github.com/kwongj/fastablasta/issues)  

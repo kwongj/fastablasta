@@ -12,16 +12,16 @@ parser = argparse.ArgumentParser(
 	usage='\n  %(prog)s --query QUERY [OPTIONS] FASTA1 FASTA2 FASTA3 ... FASTAN > results.txt')
 parser.add_argument('fasta', metavar='FASTA', nargs='+', help='FASTA file to search (required)')
 parser.add_argument('--query', metavar='QUERY', required=True, help='query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)')
-parser.add_argument('--id', metavar='%ID', default='99', help='percentage identity cutoff (default="99")')
-parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default="1e-99")')
-parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default="32")')
+parser.add_argument('--id', metavar='%ID', default='99', help='percentage identity cutoff (default=99)')
+parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default=1e-99)')
+parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default=32)')
 parser.add_argument('--short', action='store_true', help='allow searching for short sequences')
-parser.add_argument('--outfmt', metavar='FORMAT', default='6', help='specify output format (default="6")')
-parser.add_argument('--cpus', metavar='CPUS', default='1', help='number of CPUS to use (default="1")')
+parser.add_argument('--outfmt', metavar='FORMAT', default='6', help='specify output format (default=6)')
+parser.add_argument('--cpus', metavar='CPUS', default='1', help='number of CPUS to use (default=1)')
 parser.add_argument('--version', action='version', version=
 	'=====================================\n'
 	'%(prog)s v0.1\n'
-	'Updated 11-Oct-2015 by Jason Kwong\n'
+	'Updated 12-Oct-2015 by Jason Kwong\n'
 	'Dependencies: Python 2.x, BioPython, BLAST\n'
 	'=====================================')
 args = parser.parse_args()
