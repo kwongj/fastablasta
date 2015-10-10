@@ -63,8 +63,8 @@ This optimises the parameters to search for short sequences (blastn-short). The 
 
 | Program                             |     Task     | Word Size | Filter Setting | Expect Value |  
 |:----------------------------------- |:------------:|:---------:|:--------------:|:------------:|  
-| Standard Nucleotide BLAST           |    blastn    |    11     |   On (DUST)    |        10    |  
-| Search for short/near exact matches | blastn-short |     7     |      Off       |      1000    |  
+| Standard Nucleotide BLAST           |    blastn    |    32     |   On (DUST)    |     1e-99    |  
+| Search for short/near exact matches | blastn-short |     7     |      Off       |      1e-2    |  
 
 See [here](http://www.ncbi.nlm.nih.gov/BLAST/Why.shtml) for more information.  
 
