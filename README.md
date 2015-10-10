@@ -1,0 +1,2 @@
+# fastablasta
+Python blastn wrapper
