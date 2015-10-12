@@ -34,6 +34,9 @@ else:
 	task = 'blastn'
 	dust = 'yes'
 
+if args.outfmt:
+	outFMT = '"6 qseqid sseqid sstrand pident length mismatch gapopen qstart qend sstart send evalue bitscore"'
+
 # Modules and Functions
 import sys
 import os
@@ -57,7 +60,7 @@ def facheck(f):
 
 # Print header
 def header():
-	print 'ID' + '\t' + 'QUERY' + '\t' + 'SEQUENCE' + '\t' + 'IDENT' +'\t' + 'LENGTH' + '\t' + 'MISMATCH' + '\t' + 'GAPS' + '\t' + 'qSTART' + '\t' + 'qEND' + '\t' + 'sSTART' + '\t' + 'sEND' + '\t' + 'EVALUE' + '\t' + 'BITSCORE'
+	print 'ID' + '\t' + 'QUERY' + '\t' + 'SEQUENCE' + '\t' + 'STRAND' + '\t' + 'IDENT' +'\t' + 'LENGTH' + '\t' + 'MISMATCH' + '\t' + 'GAPS' + '\t' + 'qSTART' + '\t' + 'qEND' + '\t' + 'sSTART' + '\t' + 'sEND' + '\t' + 'EVALUE' + '\t' + 'BITSCORE'
 
 # Check query
 if facheck(args.query) == 1:
@@ -69,7 +72,7 @@ if args.outfmt == '6':
 for f in args.fasta:
 	if facheck(f) == 1:
 		continue
-	fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=args.outfmt, num_threads=args.cpus, word_size=args.wordsize, dust=dust)
+	fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=outFMT, num_threads=args.cpus, word_size=args.wordsize, dust=dust)
 	stdout, stderr = fBLAST()
 	if stdout:
 		if args.outfmt == '6':
