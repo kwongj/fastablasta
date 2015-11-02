@@ -54,11 +54,11 @@ def progexit(n):
 # Check files in FASTA format
 def facheck(f):
 	if os.path.isfile(f) == False:
-		print 'ERROR: Cannot find "%(f)s". Check file exists.' % globals()
+		print 'ERROR: Cannot find "%s". Check file exists.' % f
 		return 1
 	s = open(f, 'r')
 	if s.read(1) != '>':
-		print 'ERROR: "%(f)s" does not appear to be in FASTA format.' % globals()
+		print 'ERROR: "%s" does not appear to be in FASTA format.' % f
 		return 1
 	s.close()
 
