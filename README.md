@@ -96,7 +96,7 @@ See [here](http://www.ncbi.nlm.nih.gov/BLAST/Why.shtml) for more information.
 14 = XML2 Blast output  
 
 
-*NB. An old version that uses* `-subject` *instead of* `-db` *is included in the directory as* `fastablasta.old`*. This version is not recommended due to some issues with different expect-values from the traditional* `-db`, *although if looking for exact or near exact matches, it probably won't affect the results significantly.
+*NB. This version currently uses* `-subject` *instead of* `-db` *due to issues with directing BLAST to a custom database. This has not been recommended by some due to issues with different expect-values from the traditional* `-db`, *although if looking for exact or near exact matches, it probably won't affect the results significantly. However, **USE AT YOUR OWN RISK**.
 See this [blog post](http://blastedbio.blogspot.com.au/2012/05/blast-ingoring-search-space-size-for-e.html) for more information.*
 
 ##Bugs

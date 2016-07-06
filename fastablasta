@@ -10,10 +10,6 @@ import argparse
 from argparse import RawTextHelpFormatter
 import sys
 import os
-import tempfile
-import shutil
-import subprocess
-from subprocess import Popen
 from Bio.Blast.Applications import NcbiblastnCommandline
 
 # Standard functions
@@ -37,10 +33,6 @@ def facheck(f):
 		msg('ERROR: "{}" does not appear to be in FASTA format.'.format(f))
 		return 1
 	s.close()
-
-# Set up BLAST databases if not present
-def makeblastDB(db, infile, dbtype):
-	subprocess.Popen(['makeblastdb', '-in', infile, '-out', db, '-dbtype', dbtype], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 # Print header
 sep = '\t'
@@ -91,16 +83,11 @@ if args.outfmt == '6':
 else:
 	outFMT = args.outfmt
 
-# Makeblastdb
-DBpath = tempfile.mkdtemp()
-db = os.path.join(DBpath, 'fbdb')
-
 # Run blastn
 for f in args.fasta:
 	if facheck(f) == 1:
 		continue
 	try:
-		makeblastDB(db, f, 'nucl')
 		fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=outFMT, num_threads=args.cpus, word_size=args.wordsize, dust=dust)
 		stdout, stderr = fBLAST()
 		if stdout:
@@ -113,8 +100,4 @@ for f in args.fasta:
 			else:
 				print(stdout)
 	except:
-		shutil.rmtree(DBpath)
 		sys.exit(1)
-
-# Cleanup temp db directory
-shutil.rmtree(DBpath)
