@@ -28,7 +28,7 @@ optional arguments:
   --evalue EVALUE  evalue cutoff (default=1e-99)
   --wordsize SIZE  length of initial match (default=32)
   --short          allow searching for short sequences
-  --outfmt FORMAT  specify output format (default=6)
+  --outfmt FORMAT  specify BLAST output format (default=6 tabular)
   --cpus CPUS      number of CPUS to use (default=1)
   --version        show program's version number and exit
 ```
@@ -95,6 +95,9 @@ See [here](http://www.ncbi.nlm.nih.gov/BLAST/Why.shtml) for more information.
 13 = JSON Blast output  
 14 = XML2 Blast output  
 
+
+*NB. An old version that uses `-subject` instead of `-db` is included in the directory as `fastablasta.old`. This version is not recommended due to some issues with different expect-values from the traditional `-db`, although if looking for exact or near exact matches, it probably won't affect the results significantly.
+See this [blog post](http://blastedbio.blogspot.com.au/2012/05/blast-ingoring-search-space-size-for-e.html) for more information.*
 
 ##Bugs
 Please submit via the GitHub issues page: [https://github.com/kwongj/fastablasta/issues](https://github.com/kwongj/fastablasta/issues)  

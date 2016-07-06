@@ -2,10 +2,52 @@
 # Script by Jason Kwong
 # Python BLASTN wrapper
 
-# Usage
+# Use modern print function from python 3.x
+from __future__ import print_function
+
+# Modules
 import argparse
 from argparse import RawTextHelpFormatter
+import sys
+import os
+import tempfile
+import shutil
+import subprocess
+from subprocess import Popen
+from Bio.Blast.Applications import NcbiblastnCommandline
 
+# Standard functions
+# Log a message to stderr
+def msg(*args, **kwargs):
+	print(*args, file=sys.stderr, **kwargs)
+
+# Log an error to stderr and quit with non-zero error code
+def err(*args, **kwargs):
+	msg(*args, **kwargs)
+	sys.exit(1);
+
+# Other functions
+# Check files in FASTA format
+def facheck(f):
+	if os.path.isfile(f) == False:
+		msg('ERROR: Cannot find "{}". Check file exists.'.format(f))
+		return 1
+	s = open(f, 'r')
+	if s.read(1) != '>':
+		msg('ERROR: "{}" does not appear to be in FASTA format.'.format(f))
+		return 1
+	s.close()
+
+# Set up BLAST databases if not present
+def makeblastDB(db, infile, dbtype):
+	subprocess.Popen(['makeblastdb', '-in', infile, '-out', db, '-dbtype', dbtype], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+# Print header
+sep = '\t'
+def header():
+	print('ID' + sep + 'QUERY' + sep + 'SEQUENCE' + sep + 'STRAND' + sep + 'IDENT' + sep + 'LENGTH' + sep + 'MISMATCH' + sep + 'GAPS' + sep + 'qSTART' + sep + 'qEND' + sep + 'sSTART' + sep + 'sEND' + sep + 'EVALUE' + sep + 'BITSCORE')
+
+# Usage
 parser = argparse.ArgumentParser(
 	formatter_class=RawTextHelpFormatter,
 	description='Searches a FASTA file for a specified query sequence using BLASTN',
@@ -13,18 +55,20 @@ parser = argparse.ArgumentParser(
 parser.add_argument('fasta', metavar='FASTA', nargs='+', help='FASTA file to search (required)')
 parser.add_argument('--query', metavar='QUERY', required=True, help='query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)')
 parser.add_argument('--id', metavar='%ID', default='99', help='percentage identity cutoff (default=99)')
-parser.add_argument('--evalue', metavar='EVALUE', help='evalue cutoff (default=1e-99)')
-parser.add_argument('--wordsize', metavar='SIZE', help='length of initial match (default=32)')
+parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default=1e-99)')
+parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default=32)')
 parser.add_argument('--short', action='store_true', help='allow searching for short sequences')
-parser.add_argument('--outfmt', metavar='FORMAT', default='6', help='specify output format (default=6)')
+parser.add_argument('--outfmt', metavar='FORMAT', default='6', help='specify BLAST output format (default=6 tabular)')
 parser.add_argument('--cpus', metavar='CPUS', default='1', help='number of CPUS to use (default=1)')
 parser.add_argument('--version', action='version', version=
 	'=====================================\n'
-	'%(prog)s v0.1\n'
-	'Updated 12-Oct-2015 by Jason Kwong\n'
+	'%(prog)s v0.2\n'
+	'Updated 6-Jul-2016 by Jason Kwong\n'
 	'Dependencies: Python 2.x, BioPython, BLAST\n'
 	'=====================================')
 args = parser.parse_args()
+
+# Set blastn-short option if specified
 if args.short:
 	task = 'blastn-short'
 	dust = 'no'
@@ -36,59 +80,41 @@ else:
 	task = 'blastn'
 	dust = 'yes'
 
-if not args.wordsize:
-	args.wordsize = '32'
-if not args.evalue:
-	args.evalue = '1e-99'
-
-# Modules and Functions
-import sys
-import os
-import os.path
-from Bio.Blast.Applications import NcbiblastnCommandline
-
-# Program exit
-def progexit(n):
-	sys.exit(n)
-
-# Check files in FASTA format
-def facheck(f):
-	if os.path.isfile(f) == False:
-		print 'ERROR: Cannot find "%s". Check file exists.' % f
-		return 1
-	s = open(f, 'r')
-	if s.read(1) != '>':
-		print 'ERROR: "%s" does not appear to be in FASTA format.' % f
-		return 1
-	s.close()
-
-# Print header
-def header():
-	print 'ID' + '\t' + 'QUERY' + '\t' + 'SEQUENCE' + '\t' + 'STRAND' + '\t' + 'IDENT' +'\t' + 'LENGTH' + '\t' + 'MISMATCH' + '\t' + 'GAPS' + '\t' + 'qSTART' + '\t' + 'qEND' + '\t' + 'sSTART' + '\t' + 'sEND' + '\t' + 'EVALUE' + '\t' + 'BITSCORE'
-
 # Check query
 if facheck(args.query) == 1:
-	progexit(1)
+	sys.exit(1)
 
-# Run blastn
+# Set output format
 if args.outfmt == '6':
-	outFMT = '"6 qseqid sseqid sstrand pident length mismatch gapopen qstart qend sstart send evalue bitscore"'
+	outFMT = "'6 qseqid sseqid sstrand pident length mismatch gapopen qstart qend sstart send evalue bitscore'"
 	header()
 else:
 	outFMT = args.outfmt
 
+# Makeblastdb
+DBpath = tempfile.mkdtemp()
+db = os.path.join(DBpath, 'fbdb')
+
+# Run blastn
 for f in args.fasta:
 	if facheck(f) == 1:
 		continue
-	fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=outFMT, num_threads=args.cpus, word_size=args.wordsize, dust=dust)
-	stdout, stderr = fBLAST()
-	if stdout:
-		if args.outfmt == '6':
-			BLASTout = stdout.split('\n')
-			for line in BLASTout:
-				if line.strip():
-					lineOUT = ''.join(line)
-					print f + '\t' + lineOUT
-		else:
-			print stdout
-progexit(0)
+	try:
+		makeblastDB(db, f, 'nucl')
+		fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=outFMT, num_threads=args.cpus, word_size=args.wordsize, dust=dust)
+		stdout, stderr = fBLAST()
+		if stdout:
+			if args.outfmt == '6':
+				BLASTout = stdout.split('\n')
+				for line in BLASTout:
+					if line.strip():
+						lineOUT = ''.join(line)
+						print(f + sep + lineOUT)
+			else:
+				print(stdout)
+	except:
+		shutil.rmtree(DBpath)
+		sys.exit(1)
+
+# Cleanup temp db directory
+shutil.rmtree(DBpath)
