@@ -37,7 +37,8 @@ def facheck(f):
 # Print header
 sep = '\t'
 def header():
-	print('ID' + sep + 'QUERY' + sep + 'SEQUENCE' + sep + 'STRAND' + sep + 'IDENT' + sep + 'LENGTH' + sep + 'MISMATCH' + sep + 'GAPS' + sep + 'qSTART' + sep + 'qEND' + sep + 'sSTART' + sep + 'sEND' + sep + 'EVALUE' + sep + 'BITSCORE')
+	head = ['ID','QUERY','QLEN','SEQUENCE','STRAND','IDENT','LENGTH','COVERAGE','MISMATCH','GAPS','qSTART','qEND','sSTART','sEND','EVALUE','BITSCORE']
+	print(sep.join(head))
 
 # Usage
 parser = argparse.ArgumentParser(
@@ -47,6 +48,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('fasta', metavar='FASTA', nargs='+', help='FASTA file to search (required)')
 parser.add_argument('--query', metavar='QUERY', required=True, help='query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)')
 parser.add_argument('--id', metavar='%ID', default='99', help='percentage identity cutoff (default=99)')
+parser.add_argument('--cov', metavar='%COVERAGE', default='99', help='percentage coverage cutoff (default=99)')
 parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default=1e-99)')
 parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default=32)')
 parser.add_argument('--short', action='store_true', help='allow searching for short sequences')
@@ -54,8 +56,8 @@ parser.add_argument('--outfmt', metavar='FORMAT', default='6', help='specify BLA
 parser.add_argument('--cpus', metavar='CPUS', default='1', help='number of CPUS to use (default=1)')
 parser.add_argument('--version', action='version', version=
 	'=====================================\n'
-	'%(prog)s v0.2\n'
-	'Updated 6-Jul-2016 by Jason Kwong\n'
+	'%(prog)s v0.3\n'
+	'Updated 23-Sep-2016 by Jason Kwong\n'
 	'Dependencies: Python 2.x, BioPython, BLAST\n'
 	'=====================================')
 args = parser.parse_args()
@@ -78,7 +80,7 @@ if facheck(args.query) == 1:
 
 # Set output format
 if args.outfmt == '6':
-	outFMT = "'6 qseqid sseqid sstrand pident length mismatch gapopen qstart qend sstart send evalue bitscore'"
+	outFMT = "'6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore'"
 	header()
 else:
 	outFMT = args.outfmt
@@ -88,7 +90,7 @@ for f in args.fasta:
 	if facheck(f) == 1:
 		continue
 	try:
-		fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=outFMT, num_threads=args.cpus, word_size=args.wordsize, dust=dust)
+		fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=outFMT, num_threads=args.cpus, word_size=args.wordsize, dust=dust, qcov_hsp_perc=args.cov)
 		stdout, stderr = fBLAST()
 		if stdout:
 			if args.outfmt == '6':

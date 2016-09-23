@@ -25,6 +25,7 @@ optional arguments:
   -h, --help       show this help message and exit
   --query QUERY    query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)
   --id %ID         percentage identity cutoff (default=99)
+  --cov %COVERAGE  percentage coverage cutoff (default=99)
   --evalue EVALUE  evalue cutoff (default=1e-99)
   --wordsize SIZE  length of initial match (default=32)
   --short          allow searching for short sequences
