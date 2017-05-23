@@ -11,8 +11,9 @@ GitHub: [kwongj](https://github.com/kwongj)
 * [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 
 ## Usage
-`$ fastablasta -h`
 ```
+$ fastablasta -h
+
 usage: 
   fastablasta --query QUERY [OPTIONS] FASTA1 FASTA2 FASTA3 ... FASTAN > results.txt
 
@@ -33,7 +34,6 @@ optional arguments:
   --cpus CPUS      number of CPUS to use (default=1)
   --version        show program's version number and exit
 ```
-
 
 
 **Basic Usage:**  
@@ -102,10 +102,10 @@ See [here](http://www.ncbi.nlm.nih.gov/BLAST/Why.shtml) for more information.
 *NB. Previous versions used* `-subject` *instead of* `-db` *due to issues with directing BLAST to a custom database. This was not recommended by some due to issues with different expect-values from the traditional* `-db`, *although if looking for exact or near exact matches, it probably wouldn't have affected the results significantly. However, please check your previous results.
 See this [blog post](http://blastedbio.blogspot.com.au/2012/05/blast-ingoring-search-space-size-for-e.html) for more information.*
 
-##Bugs
+## Bugs
 Please submit via the GitHub issues page: [https://github.com/kwongj/fastablasta/issues](https://github.com/kwongj/fastablasta/issues)  
 
-##Software Licence
+## Software Licence
 GPLv2: [https://github.com/kwongj/fastablasta/blob/master/LICENSE](https://github.com/kwongj/fastablasta/blob/master/LICENSE)
 
 ## Other links
