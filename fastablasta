@@ -43,7 +43,6 @@ def check_fasta(f):
 def blastn(task, query, db, evalue, id, outfmt, cpus, wordsize, dust, qcov):
 	with tempfile.TemporaryDirectory() as dirpath:
 		blastdbpath = os.path.join(dirpath, 'db')
-#		blastdbpath = 'blast/db'
 		# Create BLAST DB
 		proc = subprocess.Popen(['makeblastdb', '-in', db, '-out', blastdbpath, '-dbtype', 'nucl'], stdout=subprocess.PIPE)
 		procOUT = proc.communicate()[0]
@@ -52,69 +51,74 @@ def blastn(task, query, db, evalue, id, outfmt, cpus, wordsize, dust, qcov):
 		stdout, stderr = fBLAST()
 		return stdout.strip()
 
-# Usage
-parser = argparse.ArgumentParser(
-	formatter_class=RawTextHelpFormatter,
-	description='Searches a FASTA file for a specified query sequence using BLASTN',
-	usage='\n  %(prog)s --query QUERY [OPTIONS] FASTA1 FASTA2 FASTA3 ... FASTAN > results.txt')
-parser.add_argument('fasta', metavar='FASTA', nargs='+', help='FASTA file to search (required)')
-parser.add_argument('--query', metavar='QUERY', required=True, help='query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)')
-parser.add_argument('--id', metavar='%ID', default='99', help='percentage identity cutoff (default=99)')
-parser.add_argument('--cov', metavar='%COVERAGE', default='99', help='percentage coverage cutoff (default=99)')
-parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default=1e-99)')
-parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default=32)')
-parser.add_argument('--short', action='store_true', help='allow searching for short sequences')
-parser.add_argument('--outfmt', metavar='FORMAT', default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore', help="specify BLAST output format (default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore')")
-parser.add_argument('--cpus', metavar='CPUS', default='1', help='number of CPUS to use (default=1)')
-parser.add_argument('--version', action='version', version='%(prog)s v0.4\n')
-args = parser.parse_args()
+# fastablasta
+def main():
+	# Usage
+	parser = argparse.ArgumentParser(
+		formatter_class=RawTextHelpFormatter,
+		description='Searches a FASTA file for a specified query sequence using BLASTN',
+		usage='\n  %(prog)s --query QUERY [OPTIONS] FASTA1 FASTA2 FASTA3 ... FASTAN > results.txt')
+	parser.add_argument('fasta', metavar='FASTA', nargs='+', help='FASTA file to search (required)')
+	parser.add_argument('--query', metavar='QUERY', required=True, help='query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)')
+	parser.add_argument('--id', metavar='%ID', default='99', help='percentage identity cutoff (default=99)')
+	parser.add_argument('--cov', metavar='%COVERAGE', default='99', help='percentage coverage cutoff (default=99)')
+	parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default=1e-99)')
+	parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default=32)')
+	parser.add_argument('--short', action='store_true', help='allow searching for short sequences')
+	parser.add_argument('--outfmt', metavar='FORMAT', default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore', help="specify BLAST output format (default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore')")
+	parser.add_argument('--cpus', metavar='CPUS', default='1', help='number of CPUS to use (default=1)')
+	parser.add_argument('--version', action='version', version='%(prog)s v0.4\n')
+	args = parser.parse_args()
 
-# Set blastn-short option if specified
-if args.short:
-	task = 'blastn-short'
-	dust = 'no'
-	if not args.wordsize:
-		args.wordsize = '7'
-	if not args.evalue:
-		args.evalue = '1e-2'
-else:
-	task = 'blastn'
-	dust = 'yes'
+	# Set blastn-short option if specified
+	if args.short:
+		task = 'blastn-short'
+		dust = 'no'
+		if not args.wordsize:
+			args.wordsize = '7'
+		if not args.evalue:
+			args.evalue = '1e-2'
+	else:
+		task = 'blastn'
+		dust = 'yes'
 
-# Check query
-if not check_fasta(args.query):
-	sys.exit(1)
-
-# Print header row
-# blastn default = '6 qacc sacc pident length mismatch gapopen qstart qend sstart send evalue bitscore'
-sep = '\t'
-headers = {'qseqid':'QUERY', 'qlen':'QLEN', 'sseqid':'SEQUENCE', 'sstrand':'STRAND', 'pident':'IDENT', 'length':'LENGTH', 'qcovs':'COVERAGE', 'mismatch':'MISMATCH', 'gapopen':'GAPS', 'qstart':'qSTART', 'qend':'qEND', 'sstart':'sSTART', 'send':'sEND', 'evalue':'EVALUE', 'bitscore':'BITSCORE'}
-output_headers = ['FILE']
-out_formats = args.outfmt.split()
-if out_formats[0] == '6':
-	if len(out_formats) == 1:
-		output_headers = ['FILE', 'QUERY', 'SEQUENCE', 'IDENT', 'LENGTH', 'MISMATCH', 'GAPS', 'qSTART', 'qEND', 'sSTART', 'sEND', 'EVALUE', 'BITSCORE']
-	for format in out_formats[1:]:
-		if format not in headers:
-			err('ERROR: Check desired output format.')
-		else:
-			output_headers.append(headers[format])
-	print(sep.join(output_headers))
-
-# Run blastn
-for f in args.fasta:
-	if not check_fasta(f):
-		continue
-	try:
-		output = blastn(task, args.query, f, args.evalue, args.id, "'{}'".format(args.outfmt), args.cpus, args.wordsize, dust, args.cov)
-		if output:
-			if out_formats[0] == '6':
-				BLASTout = output.split('\n')
-				for line in BLASTout:
-					if line.strip():
-						lineOUT = ''.join(line)
-						print(f + sep + lineOUT)
-			else:
-				print(output)
-	except:
+	# Check query
+	if not check_fasta(args.query):
 		sys.exit(1)
+
+	# Print header row
+	# blastn default = '6 qacc sacc pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+	sep = '\t'
+	headers = {'qseqid':'QUERY', 'qlen':'QLEN', 'sseqid':'SEQUENCE', 'sstrand':'STRAND', 'pident':'IDENT', 'length':'LENGTH', 'qcovs':'COVERAGE', 'mismatch':'MISMATCH', 'gapopen':'GAPS', 'qstart':'qSTART', 'qend':'qEND', 'sstart':'sSTART', 'send':'sEND', 'evalue':'EVALUE', 'bitscore':'BITSCORE'}
+	output_headers = ['FILE']
+	out_formats = args.outfmt.split()
+	if out_formats[0] == '6':
+		if len(out_formats) == 1:
+			output_headers = ['FILE', 'QUERY', 'SEQUENCE', 'IDENT', 'LENGTH', 'MISMATCH', 'GAPS', 'qSTART', 'qEND', 'sSTART', 'sEND', 'EVALUE', 'BITSCORE']
+		for format in out_formats[1:]:
+			if format not in headers:
+				err('ERROR: Check desired output format.')
+			else:
+				output_headers.append(headers[format])
+		print(sep.join(output_headers))
+
+	# Run blastn
+	for f in args.fasta:
+		if not check_fasta(f):
+			continue
+		try:
+			output = blastn(task, args.query, f, args.evalue, args.id, "'{}'".format(args.outfmt), args.cpus, args.wordsize, dust, args.cov)
+			if output:
+				if out_formats[0] == '6':
+					BLASTout = output.split('\n')
+					for line in BLASTout:
+						if line.strip():
+							lineOUT = ''.join(line)
+							print(f + sep + lineOUT)
+				else:
+					print(output)
+		except:
+			sys.exit(1)
+
+if __name__ == "__main__":
+	main()
