@@ -6,7 +6,7 @@ Jason Kwong (@kwongjc)
 GitHub: [kwongj](https://github.com/kwongj)  
 
 ## Dependencies
-* [Python 2.x](https://www.python.org/downloads/)
+* [Python 3.x](https://www.python.org/downloads/)
 * [BioPython](http://biopython.org/wiki/Main_Page)
 * [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 
@@ -29,10 +29,12 @@ optional arguments:
   --evalue EVALUE  evalue cutoff (default=1e-99)
   --wordsize SIZE  length of initial match (default=32)
   --short          allow searching for short sequences
-  --outfmt FORMAT  specify BLAST output format (default=6 tabular)
+  --outfmt FORMAT  specify BLAST output format (default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore')
   --cpus CPUS      number of CPUS to use (default=1)
   --version        show program's version number and exit
 ```
+
+
 
 **Basic Usage:**  
 
@@ -97,7 +99,7 @@ See [here](http://www.ncbi.nlm.nih.gov/BLAST/Why.shtml) for more information.
 14 = XML2 Blast output  
 
 
-*NB. This version currently uses* `-subject` *instead of* `-db` *due to issues with directing BLAST to a custom database. This has not been recommended by some due to issues with different expect-values from the traditional* `-db`, *although if looking for exact or near exact matches, it probably won't affect the results significantly. However, **USE AT YOUR OWN RISK**.
+*NB. Previous versions used* `-subject` *instead of* `-db` *due to issues with directing BLAST to a custom database. This was not recommended by some due to issues with different expect-values from the traditional* `-db`, *although if looking for exact or near exact matches, it probably wouldn't have affected the results significantly. However, please check your previous results.
 See this [blog post](http://blastedbio.blogspot.com.au/2012/05/blast-ingoring-search-space-size-for-e.html) for more information.*
 
 ##Bugs

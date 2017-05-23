@@ -1,15 +1,16 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Script by Jason Kwong
-# Python BLASTN wrapper
-
-# Use modern print function from python 3.x
-from __future__ import print_function
+# Python wrapper for blastn
 
 # Modules
 import argparse
 from argparse import RawTextHelpFormatter
 import sys
 import os
+import re
+import subprocess
+from subprocess import Popen
+import tempfile
 from Bio.Blast.Applications import NcbiblastnCommandline
 
 # Standard functions
@@ -23,22 +24,33 @@ def err(*args, **kwargs):
 	sys.exit(1);
 
 # Other functions
-# Check files in FASTA format
-def facheck(f):
-	if os.path.isfile(f) == False:
-		msg('ERROR: Cannot find "{}". Check file exists.'.format(f))
-		return 1
-	s = open(f, 'r')
-	if s.read(1) != '>':
-		msg('ERROR: "{}" does not appear to be in FASTA format.'.format(f))
-		return 1
-	s.close()
+# Check if file is in FASTA format
+def check_fasta(f):
+	if not os.path.isfile(f) or os.path.getsize(f) < 1:
+		return False
+	with open(f, 'r') as fasta:
+		if fasta.readline()[0] != '>':						# Check if header starts with ">"
+			return False
+		for line in fasta:
+			line = line.strip()
+			if not line or line[0] == '>':	
+				continue
+			if bool(re.search('[^ACTGactgNn\-]', line)):	# Check if there are non-nucleotide characters in sequence
+				return False
+	return True
 
-# Print header
-sep = '\t'
-def header():
-	head = ['ID','QUERY','QLEN','SEQUENCE','STRAND','IDENT','LENGTH','COVERAGE','MISMATCH','GAPS','qSTART','qEND','sSTART','sEND','EVALUE','BITSCORE']
-	print(sep.join(head))
+# Use BLAST to check if query sequence is present in genome
+def blastn(task, query, db, evalue, id, outfmt, cpus, wordsize, dust, qcov):
+	with tempfile.TemporaryDirectory() as dirpath:
+		blastdbpath = os.path.join(dirpath, 'db')
+#		blastdbpath = 'blast/db'
+		# Create BLAST DB
+		proc = subprocess.Popen(['makeblastdb', '-in', db, '-out', blastdbpath, '-dbtype', 'nucl'], stdout=subprocess.PIPE)
+		procOUT = proc.communicate()[0]
+		# Run NCBI blastn
+		fBLAST = NcbiblastnCommandline(task=task, query=query, db=blastdbpath, evalue=evalue, perc_identity=id, outfmt=outfmt, num_threads=cpus, word_size=wordsize, dust=dust, qcov_hsp_perc=qcov)
+		stdout, stderr = fBLAST()
+		return stdout.strip()
 
 # Usage
 parser = argparse.ArgumentParser(
@@ -52,14 +64,9 @@ parser.add_argument('--cov', metavar='%COVERAGE', default='99', help='percentage
 parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default=1e-99)')
 parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default=32)')
 parser.add_argument('--short', action='store_true', help='allow searching for short sequences')
-parser.add_argument('--outfmt', metavar='FORMAT', default='6', help='specify BLAST output format (default=6 tabular)')
+parser.add_argument('--outfmt', metavar='FORMAT', default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore', help="specify BLAST output format (default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore')")
 parser.add_argument('--cpus', metavar='CPUS', default='1', help='number of CPUS to use (default=1)')
-parser.add_argument('--version', action='version', version=
-	'=====================================\n'
-	'%(prog)s v0.3\n'
-	'Updated 23-Sep-2016 by Jason Kwong\n'
-	'Dependencies: Python 2.x, BioPython, BLAST\n'
-	'=====================================')
+parser.add_argument('--version', action='version', version='%(prog)s v0.4\n')
 args = parser.parse_args()
 
 # Set blastn-short option if specified
@@ -75,31 +82,39 @@ else:
 	dust = 'yes'
 
 # Check query
-if facheck(args.query) == 1:
+if not check_fasta(args.query):
 	sys.exit(1)
 
-# Set output format
-if args.outfmt == '6':
-	outFMT = "'6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore'"
-	header()
-else:
-	outFMT = args.outfmt
+# Print header row
+# blastn default = '6 qacc sacc pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+sep = '\t'
+headers = {'qseqid':'QUERY', 'qlen':'QLEN', 'sseqid':'SEQUENCE', 'sstrand':'STRAND', 'pident':'IDENT', 'length':'LENGTH', 'qcovs':'COVERAGE', 'mismatch':'MISMATCH', 'gapopen':'GAPS', 'qstart':'qSTART', 'qend':'qEND', 'sstart':'sSTART', 'send':'sEND', 'evalue':'EVALUE', 'bitscore':'BITSCORE'}
+output_headers = ['FILE']
+out_formats = args.outfmt.split()
+if out_formats[0] == '6':
+	if len(out_formats) == 1:
+		output_headers = ['FILE', 'QUERY', 'SEQUENCE', 'IDENT', 'LENGTH', 'MISMATCH', 'GAPS', 'qSTART', 'qEND', 'sSTART', 'sEND', 'EVALUE', 'BITSCORE']
+	for format in out_formats[1:]:
+		if format not in headers:
+			err('ERROR: Check desired output format.')
+		else:
+			output_headers.append(headers[format])
+	print(sep.join(output_headers))
 
 # Run blastn
 for f in args.fasta:
-	if facheck(f) == 1:
+	if not check_fasta(f):
 		continue
 	try:
-		fBLAST = NcbiblastnCommandline(task=task, query=args.query, subject=f, evalue=args.evalue, perc_identity=args.id, outfmt=outFMT, num_threads=args.cpus, word_size=args.wordsize, dust=dust, qcov_hsp_perc=args.cov)
-		stdout, stderr = fBLAST()
-		if stdout:
-			if args.outfmt == '6':
-				BLASTout = stdout.split('\n')
+		output = blastn(task, args.query, f, args.evalue, args.id, "'{}'".format(args.outfmt), args.cpus, args.wordsize, dust, args.cov)
+		if output:
+			if out_formats[0] == '6':
+				BLASTout = output.split('\n')
 				for line in BLASTout:
 					if line.strip():
 						lineOUT = ''.join(line)
 						print(f + sep + lineOUT)
 			else:
-				print(stdout)
+				print(output)
 	except:
 		sys.exit(1)
