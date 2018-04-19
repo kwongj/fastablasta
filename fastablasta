@@ -84,7 +84,7 @@ def main():
 
 	# Check query
 	if not check_fasta(args.query):
-		sys.exit(1)
+		err('ERROR: Check input query is in FASTA format.')
 
 	# Print header row
 	# blastn default = '6 qacc sacc pident length mismatch gapopen qstart qend sstart send evalue bitscore'
