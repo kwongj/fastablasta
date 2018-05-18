@@ -80,7 +80,7 @@ def main():
 			args.evalue = '1e-2'
 	else:
 		task = 'blastn'
-		dust = 'yes'
+		dust = 'no'
 
 	# Check query
 	if not check_fasta(args.query):
