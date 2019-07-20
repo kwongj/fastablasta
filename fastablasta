@@ -39,15 +39,22 @@ def check_fasta(f):
 				return False
 	return True
 
+## Use BLAST to check if query sequence is present in genome
+# def blastn(task, query, db, evalue, id, outfmt, cpus, wordsize, dust, qcov):
+# 	with tempfile.TemporaryDirectory() as dirpath:
+# 		blastdbpath = os.path.join(dirpath, 'db')
+# 		Create BLAST DB
+# 		proc = subprocess.Popen(['makeblastdb', '-in', db, '-out', blastdbpath, '-dbtype', 'nucl'], stdout=subprocess.PIPE)
+# 		procOUT = proc.communicate()[0]
+# 		Run NCBI blastn
+# 		fBLAST = NcbiblastnCommandline(task=task, query=query, db=blastdbpath, evalue=evalue, perc_identity=id, outfmt=outfmt, num_threads=cpus, word_size=wordsize, dust=dust, qcov_hsp_perc=qcov)
+# 		stdout, stderr = fBLAST()
+# 		return stdout.strip()
+
 # Use BLAST to check if query sequence is present in genome
-def blastn(task, query, db, evalue, id, outfmt, cpus, wordsize, dust, qcov):
-	with tempfile.TemporaryDirectory() as dirpath:
-		blastdbpath = os.path.join(dirpath, 'db')
-		# Create BLAST DB
-		proc = subprocess.Popen(['makeblastdb', '-in', db, '-out', blastdbpath, '-dbtype', 'nucl'], stdout=subprocess.PIPE)
-		procOUT = proc.communicate()[0]
+def blastn(task, query, subject, evalue, id, outfmt, cpus, wordsize, dust, qcov):
 		# Run NCBI blastn
-		fBLAST = NcbiblastnCommandline(task=task, query=query, db=blastdbpath, evalue=evalue, perc_identity=id, outfmt=outfmt, num_threads=cpus, word_size=wordsize, dust=dust, qcov_hsp_perc=qcov)
+		fBLAST = NcbiblastnCommandline(task=task, query=query, subject=subject, evalue=evalue, perc_identity=id, outfmt=outfmt, num_threads=cpus, word_size=wordsize, dust=dust, qcov_hsp_perc=qcov)
 		stdout, stderr = fBLAST()
 		return stdout.strip()
 
@@ -67,7 +74,7 @@ def main():
 	parser.add_argument('--short', action='store_true', help='allow searching for short sequences')
 	parser.add_argument('--outfmt', metavar='FORMAT', default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore', help="specify BLAST output format (default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore')")
 	parser.add_argument('--cpus', metavar='CPUS', default='1', help='number of CPUS to use (default=1)')
-	parser.add_argument('--version', action='version', version='%(prog)s v0.4\n')
+	parser.add_argument('--version', action='version', version='%(prog)s v0.5\n')
 	args = parser.parse_args()
 
 	# Set blastn-short option if specified
@@ -107,7 +114,7 @@ def main():
 		if not check_fasta(f):
 			continue
 		try:
-			output = blastn(task, args.query, f, args.evalue, args.id, "'{}'".format(args.outfmt), args.cpus, args.wordsize, dust, args.cov)
+			output = blastn(task, args.query, f, args.evalue, args.id, "{}".format(args.outfmt), args.cpus, args.wordsize, dust, args.cov)
 			if output:
 				if out_formats[0] == '6':
 					BLASTout = output.split('\n')
