@@ -69,7 +69,7 @@ def main():
 	parser.add_argument('--query', metavar='QUERY', required=True, help='query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)')
 	parser.add_argument('--id', metavar='%ID', default='99', help='percentage identity cutoff (default=99)')
 	parser.add_argument('--cov', metavar='%COVERAGE', default='99', help='percentage coverage cutoff (default=99)')
-	parser.add_argument('--evalue', metavar='EVALUE', default='1e-99', help='evalue cutoff (default=1e-99)')
+	parser.add_argument('--evalue', metavar='EVALUE', default='1e-1', help='evalue cutoff (default=1e-1)')
 	parser.add_argument('--wordsize', metavar='SIZE', default='32', help='length of initial match (default=32)')
 	parser.add_argument('--short', action='store_true', help='allow searching for short sequences')
 	parser.add_argument('--outfmt', metavar='FORMAT', default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore', help="specify BLAST output format (default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore')")

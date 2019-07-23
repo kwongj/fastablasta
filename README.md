@@ -27,7 +27,7 @@ optional arguments:
   --query QUERY    query sequence to search for in FASTA format eg. rpoB, KPC-2 (required)
   --id %ID         percentage identity cutoff (default=99)
   --cov %COVERAGE  percentage coverage cutoff (default=99)
-  --evalue EVALUE  evalue cutoff (default=1e-99)
+  --evalue EVALUE  evalue cutoff (default=1e-1)
   --wordsize SIZE  length of initial match (default=32)
   --short          allow searching for short sequences
   --outfmt FORMAT  specify BLAST output format (default='6 qseqid qlen sseqid sstrand pident length qcovs mismatch gapopen qstart qend sstart send evalue bitscore')
@@ -99,7 +99,8 @@ See [here](http://www.ncbi.nlm.nih.gov/BLAST/Why.shtml) for more information.
 14 = XML2 Blast output  
 
 
-*NB. Previous versions used* `-subject` *instead of* `-db` *due to issues with directing BLAST to a custom database. This was not recommended by some due to issues with different expect-values from the traditional* `-db`, *although if looking for exact or near exact matches, it probably wouldn't have affected the results significantly. However, please check your previous results.
+*NB. This version uses* `-subject` *instead of* `-db` *due to issues with directing BLAST to a custom database. This was not recommended by some previously due to issues with different 
+expect-values from the traditional* `-db`, *although if looking for exact or near exact matches, it probably won't affect the results significantly. However, please check your results.
 See this [blog post](http://blastedbio.blogspot.com.au/2012/05/blast-ingoring-search-space-size-for-e.html) for more information.*
 
 ## Bugs
